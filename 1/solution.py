@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 import os
-import regex as re
-from functools import reduce
+import re
 
 TEST_FILE_1 = f'{os.path.dirname(__file__)}/test_input_1'
 TEST_FILE_2 = f'{os.path.dirname(__file__)}/test_input_2'
@@ -29,10 +28,9 @@ def to_digit(digit_or_name_str):
   return int(digit_or_name_str)
 
 def real_first_and_last_digit(line):
-  digit_strings = re.findall(r'[0-9]|one|two|three|four|five|six|seven|eight|nine', line, overlapped=True)
-  first = to_digit(digit_strings[0])
-  last = to_digit(digit_strings[-1])
-  return first, last
+  first = re.search(r'[0-9]|one|two|three|four|five|six|seven|eight|nine', line).group(0)
+  last = re.search(r'.*([0-9]|one|two|three|four|five|six|seven|eight|nine)', line).group(1)
+  return to_digit(first), to_digit(last)
 
 def calibration_value(digits):
   first, last = digits
@@ -58,4 +56,4 @@ assert part_2(TEST_FILE_2) == 281
 
 assert real_first_and_last_digit('onenine78nifgj') == (1,8)
 assert real_first_and_last_digit('mjqhmqnbhjtbxkrsrppeight2dctpspsix58') == (8,8)
-assert real_first_and_last_digit('4twonelc') == (4,1)
+assert real_first_and_last_digit('4twonelc') == (4,1) # overlapping digits
