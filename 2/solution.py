@@ -4,32 +4,16 @@ import re
 from collections import namedtuple
 from functools import reduce
 
-Game = namedtuple('Game', 'id red green blue')
-
 TEST_FILE = f'{os.path.dirname(__file__)}/test_input'
 INPUT_FILE = f'{os.path.dirname(__file__)}/input'
 
-# Returns a tuple representing the min number of red, green and blue cubes seen in a game
-def minimum_color_cubes(game_str):
-  color_cubes = re.split('[,;] ', game_str)
-
-  def aux(acc, el):
-    red, green, blue = acc
-    # each element is a string like "4 green" or "20 blue"
-    number, color = el.split(' ')
-    if color == 'red': return (max(red, int(number)), green, blue)
-    if color == 'green': return (red, max(green, int(number)), blue)
-    if color == 'blue': return (red, green, max(blue, int(number)))
-    raise Exception(f'unknown color {color}')
-
-  return reduce(aux, color_cubes, (0,0,0))
-
-LINE_PATTERN = re.compile(r'^Game (?P<id>\d+): (?P<draws>.+)')
+Game = namedtuple('Game', 'id red green blue')
 
 def to_game(line):
-  match = LINE_PATTERN.search(line)
-  id = int(match.group('id'))
-  red, green, blue = minimum_color_cubes(match.group('draws'))
+  id = int(re.match('Game (\d+):', line).group(1))
+  red = max(int(number) for number in re.findall('(\d+) red', line))
+  green = max(int(number) for number in re.findall('(\d+) green', line))
+  blue = max(int(number) for number in re.findall('(\d+) blue', line))
   return Game(id, red, green, blue)
 
 # playable with only 12 red cubes, 13 green cubes, and 14 blue cubes
