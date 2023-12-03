@@ -17,7 +17,7 @@ def to_game(line):
 
 def parse_file(file):
   with open(file) as input:
-    return [to_game(line.strip()) for line in input.readlines()]
+    return (to_game(line.strip()) for line in input.readlines())
 
 # Is playable with only 12 red cubes, 13 green cubes, and 14 blue cubes
 def is_possible(game):
