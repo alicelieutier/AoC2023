@@ -21,7 +21,7 @@ def string_gen(string):
         yield i, j, char
 
 
-def eight_neighbours(point):
+def eight_adjacents(point):
   i, j = point
   return {
     (i-1, j-1), (i-1, j), (i-1, j+1),
@@ -39,11 +39,11 @@ class SchemaNumber:
     self.coords.add(coord)
 
   def value(self):
-    return int('0' + ''.join(self.digits))
+    return 0 if len(self.digits) == 0 else int(''.join(self.digits))
   
-  def is_part_number(self, symbols):
-    neighbours = reduce(lambda neighbours, coord: neighbours | eight_neighbours(coord), self.coords, set()) - self.coords
-    return len(neighbours & symbols.keys()) > 0
+  def adjacents(self):
+    return reduce(lambda adjacents, coord: adjacents | eight_adjacents(coord), self.coords, set()) - self.coords
+
 
 def parse_input(input, file=True):
   symbols = {}
@@ -65,22 +65,23 @@ def parse_input(input, file=True):
         current_number = SchemaNumber()
       if char not in '.\n':
         symbols[(i, j)] = char
+
   return symbols, numbers, digits
 
 # A gear is any * symbol that is adjacent to exactly two part numbers.
 # Its gear ratio is the result of multiplying those two numbers together.
 def gear_ratio(digits, gear):
-  coord, _ = gear
-  neighbour_numbers = {digits[coord] for coord in eight_neighbours(coord) if coord in digits}
-  if len(neighbour_numbers) == 2:
-    return neighbour_numbers.pop().value() * neighbour_numbers.pop().value()
+  gear_coord, _ = gear
+  gear_adjacent_coords = eight_adjacents(gear_coord)
+  adjacent_numbers = {digits[coord] for coord in gear_adjacent_coords if coord in digits}
+  if len(adjacent_numbers) == 2:
+    return adjacent_numbers.pop().value() * adjacent_numbers.pop().value()
   return 0
-
 
 # find all numbers that are part numbers
 def part_1(input, file=True):
   symbols, numbers, _ = parse_input(input, file)
-  part_numbers = filter(lambda number: number.is_part_number(symbols), numbers)
+  part_numbers = filter(lambda number: number.adjacents() & symbols.keys(), numbers)
   return sum(number.value() for number in part_numbers)
 
 # find the gear ratio of every gear and add them all up
@@ -116,5 +117,3 @@ TESTCASES = [
 
 for string, result in TESTCASES:
   assert part_1(string, file=False) == result
-
-
