@@ -10,24 +10,25 @@ def to_card(line):
   match = re.search(r'Card +(\d+): ([0-9 ]+) \| ([0-9 ]+)', line)
   id, first_half, second_half = match.groups()
   winning = {int(number) for number in re.findall(r'(\d+)', first_half)}
-  appeared = {int(number) for number in re.findall(r'(\d+)', second_half)}
-  return int(id), winning, appeared
+  appearing = {int(number) for number in re.findall(r'(\d+)', second_half)}
+  return int(id), winning, appearing
 
 def parse_file(file):
   with open(file) as input:
     return [to_card(line.strip()) for line in input.readlines()]
   
 def worth(card):
-  _, winning, appeared = card
-  nb_in_common = len(winning & appeared)
-  if nb_in_common > 0:
-    return 2**(nb_in_common - 1)
-  return 0
+  _, winning, appearing = card
+  match nb_in_common := len(winning & appearing):
+    case 0:
+      return 0
+    case _:
+      return 2**(nb_in_common - 1)
 
 def count_cards(cards):
   def aux(counter, card):
-    id,  winning, appeared = card
-    nb_in_common = len(winning & appeared)
+    id,  winning, appearing = card
+    nb_in_common = len(winning & appearing)
     for i in range(id + 1, id + nb_in_common + 1):
       counter[i] += counter[id]
     return counter
@@ -50,4 +51,3 @@ print(part_2(INPUT_FILE)) # 8063216
 # Tests
 assert part_1(TEST_FILE) == 13
 assert part_2(TEST_FILE) == 30
-
