@@ -9,10 +9,10 @@ INPUT_FILE = f'{os.path.dirname(__file__)}/input'
 Game = namedtuple('Game', 'id red green blue')
 
 def to_game(line):
-  id = int(re.match('Game (\d+):', line).group(1))
-  red = max(int(number) for number in re.findall('(\d+) red', line))
-  green = max(int(number) for number in re.findall('(\d+) green', line))
-  blue = max(int(number) for number in re.findall('(\d+) blue', line))
+  id = int(re.match(r'Game (\d+):', line).group(1))
+  red = max(int(number) for number in re.findall(r'(\d+) red', line))
+  green = max(int(number) for number in re.findall(r'(\d+) green', line))
+  blue = max(int(number) for number in re.findall(r'(\d+) blue', line))
   return Game(id, red, green, blue)
 
 def parse_file(file):
