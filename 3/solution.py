@@ -20,12 +20,11 @@ def string_gen(string):
       for j, char in enumerate(line):
         yield i, j, char
 
-
 def eight_adjacents(point):
   i, j = point
   return {
     (i-1, j-1), (i-1, j), (i-1, j+1),
-    (i, j-1),             (i, j+1),
+    (i  , j-1),           (i  , j+1),
     (i+1, j-1), (i+1, j), (i+1, j+1),
   }
 
