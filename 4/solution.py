@@ -19,17 +19,17 @@ def parse_file(file):
   
 def worth(card):
   _, winning, appearing = card
-  match nb_in_common := len(winning & appearing):
+  match score := len(winning & appearing):
     case 0:
       return 0
     case _:
-      return 2**(nb_in_common - 1)
+      return 2**(score - 1)
 
 def count_cards(cards):
   def aux(counter, card):
     id,  winning, appearing = card
-    nb_in_common = len(winning & appearing)
-    for i in range(id + 1, id + nb_in_common + 1):
+    score = len(winning & appearing)
+    for i in range(id + 1, id + score + 1):
       counter[i] += counter[id]
     return counter
   
