@@ -72,8 +72,9 @@ def leftover(range1, range2):
   if s1+l1 > s2+l2: result.append((s2+l2, s1+l1-s2-l2))
   return result
 
+# returns an array of transformed ranges and an array of thing that are not in range
+# for one seed range
 def transform_range(seed_range, transformation_range):
-  seed_start, seed_length = seed_range
   _, source_start, length = transformation_range
   t_range = source_start, length
   if not overlaps(seed_range, t_range):
@@ -82,6 +83,7 @@ def transform_range(seed_range, transformation_range):
   s, l = intersection(seed_range, t_range)
   return [(transform(s, transformation_range),l)], leftover(seed_range, t_range)
 
+# processes all seed ranges into a transformation range
 def process_one_transformation(seed_ranges, transformation_range):
   transformed, todo = seed_ranges
   all_leftover = []
@@ -91,13 +93,11 @@ def process_one_transformation(seed_ranges, transformation_range):
     all_leftover.extend(leftover)
   return transformed, all_leftover
     
+# Processes all seed ranges through a section    
 def process_section(seed_ranges, section):
   name, ranges = section
   transformed, unchanged = reduce(process_one_transformation, ranges, ([], seed_ranges))
   return transformed + unchanged
-
-def process_range(sections, seed_range):
-  return reduce(process_section, sections, [seed_range])
 
 def part_1(file):
   seeds, sections = parse_file(file)
@@ -106,9 +106,8 @@ def part_1(file):
 
 def part_2(file):
   seeds, sections = parse_file(file)
-  location_ranges = list(process_range(sections, tuple(seed_range)) for seed_range in batched(seeds,2))
-  flat_list = [item for sublist in location_ranges for item in sublist]
-  return min(flat_list)[0]
+  location_ranges = reduce(process_section, sections, tuple(batched(seeds,2)))
+  return min(location_ranges)[0]
   
 
 # Solution
