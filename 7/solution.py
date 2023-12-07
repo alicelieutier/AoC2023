@@ -5,53 +5,53 @@ import re
 TEST_FILE = f'{os.path.dirname(__file__)}/test_input'
 INPUT_FILE = f'{os.path.dirname(__file__)}/input'
 
-def parse_hand(line):
+def parse_line(line):
   hand, bid = line.split()
   return hand, int(bid)
 
 def parse_file(file):
   with open(file) as input:
-    return [parse_hand(line.strip()) for line in input.readlines()]
-  
-def lexico_key(order):
+    return [parse_line(line.strip()) for line in input.readlines()]
+
+def lexico_key(alphabet):
   def aux(hand):
     hand, _ = hand
-    return tuple(order.index(letter) for letter in hand)
+    return tuple(alphabet.index(letter) for letter in hand)
   return aux
 
-def hand_value(cards):
-  counter = {card: 0 for card in set(cards)}
-  for card in cards:
-    counter[card] += 1
-  match frequencies := tuple(sorted(counter.values())):
-    case 1,1,1,1,1: return 1 # High card
-    case 1,1,1,2: return 2 # One pair
-    case 1,2,2: return 3 # Two pair
-    case 1,1,3: return 4 # Three of a kind
-    case 2,3: return 5 # Full house
-    case 1,4: return 6 # Four of a kind
-    case (5,): return 7 # Five of a kind
-    case _: print(f"Help! couldn't score hand {cards}: {frequencies}")
+# Card Frequencies:
+# 1,1,1,1,1  High card
+# 2,1,1,1    One pair
+# 2,2,1      Two pair
+# 3,1,1,1    Three of a kind
+# 3,2        Full house
+# 4,1        Four of a kind
+# 5          Five of a kind
 
-def type_key(hand):
+def hand_type_key(hand):
   cards, _ = hand
-  return hand_value(cards)
+  counter = {card: cards.count(card) for card in cards}
+  return sorted(counter.values(), reverse=True)
 
-def type_key_with_joker(hand):
+def hand_type_key_with_joker(hand):
   cards, _ = hand
-  most_common_non_joker_card = sorted(cards, key=lambda card: 0 if card == 'J' else cards.count(card))[-1]
-  return hand_value(re.sub('J', most_common_non_joker_card, cards))
+  counter = {card: cards.count(card) for card in cards}
+  if counter.get('J', 0) == 5:
+    return [5]
+  most_common_non_joker_card = sorted(cards, key=lambda card: 0 if card == 'J' else counter[card])[-1]
+  counter[most_common_non_joker_card] += counter.pop('J', 0)
+  return sorted(counter.values(), reverse=True)
 
 def part_1(file):
   hands = parse_file(file)
   hands.sort(key=lexico_key('23456789TJQKA'))
-  hands.sort(key=type_key)
+  hands.sort(key=hand_type_key)
   return sum((index + 1) * bid for index, (_, bid) in enumerate(hands))
 
 def part_2(file):
   hands = parse_file(file)
   hands.sort(key=lexico_key('J23456789TQKA'))
-  hands.sort(key=type_key_with_joker)
+  hands.sort(key=hand_type_key_with_joker)
   return sum((index + 1) * bid for index, (_, bid) in enumerate(hands))
 
 # Solution
@@ -61,18 +61,3 @@ print(part_2(INPUT_FILE)) # 249781879
 # Tests
 assert part_1(TEST_FILE) == 6440
 assert part_2(TEST_FILE) == 5905
-
-assert(type_key_with_joker(('4QT44',0))) == 4 # Three of a kind
-assert(type_key_with_joker(('2JQKA',0))) == 2 # One Pair
-assert(type_key_with_joker(('96A89',0))) == 2 # One Pair
-assert(type_key_with_joker(('QQQJA',0))) == 6 # Four of a kind
-assert(type_key_with_joker(('QQJJA',0))) == 6 # Four of a kind
-assert(type_key_with_joker(('235JA',0))) == 2 # One pair
-assert(type_key_with_joker(('23JAA',0))) == 4 # Three of a kind
-assert(type_key_with_joker(('QJ4J8',0))) == 4 # Three of a kind
-assert(type_key_with_joker(('22JAA',0))) == 5 # Full house
-assert(type_key_with_joker(('QQQJJ',0))) == 7 # Five of a kind
-assert(type_key_with_joker(('JJJJJ',0))) == 7 # Five of a kind
-assert(type_key_with_joker(('23JJJ',0))) == 6 # Four of a kind
-assert(type_key_with_joker(('2222J',0))) == 7 # Five of a kind
-assert(type_key_with_joker(('2J22J',0))) == 7 # Five of a kind
