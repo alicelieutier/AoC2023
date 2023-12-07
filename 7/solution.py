@@ -1,8 +1,5 @@
 #! /usr/bin/env python3
 import os
-import re
-from math import sqrt, ceil, floor
-from functools import reduce
 
 TEST_FILE = f'{os.path.dirname(__file__)}/test_input'
 INPUT_FILE = f'{os.path.dirname(__file__)}/input'
@@ -54,21 +51,6 @@ def type_key_with_joker(hand):
     case _:
       return 7 # Five of a kind
 
-assert(type_key_with_joker(('4QT44',0))) == 4 # Three of a kind
-assert(type_key_with_joker(('2JQKA',0))) == 2 # One Pair
-assert(type_key_with_joker(('96A89',0))) == 2 # One Pair
-assert(type_key_with_joker(('QQQJA',0))) == 6 # Four of a kind
-assert(type_key_with_joker(('QQJJA',0))) == 6 # Four of a kind
-assert(type_key_with_joker(('235JA',0))) == 2 # One pair
-assert(type_key_with_joker(('23JAA',0))) == 4 # Three of a kind
-assert(type_key_with_joker(('QJ4J8',0))) == 4 # Three of a kind
-assert(type_key_with_joker(('22JAA',0))) == 5 # Full house
-assert(type_key_with_joker(('QQQJJ',0))) == 7 # Five of a kind
-assert(type_key_with_joker(('JJJJJ',0))) == 7 # Five of a kind
-assert(type_key_with_joker(('23JJJ',0))) == 6 # Four of a kind
-assert(type_key_with_joker(('2222J',0))) == 7 # Five of a kind
-assert(type_key_with_joker(('2J22J',0))) == 7 # Five of a kind
-
 def part_1(file):
   hands = parse_file(file)
   hands.sort(key=lexico_key('23456789TJQKA'))
@@ -88,3 +70,18 @@ print(part_2(INPUT_FILE)) # 249781879
 # Tests
 assert part_1(TEST_FILE) == 6440
 assert part_2(TEST_FILE) == 5905
+
+assert(type_key_with_joker(('4QT44',0))) == 4 # Three of a kind
+assert(type_key_with_joker(('2JQKA',0))) == 2 # One Pair
+assert(type_key_with_joker(('96A89',0))) == 2 # One Pair
+assert(type_key_with_joker(('QQQJA',0))) == 6 # Four of a kind
+assert(type_key_with_joker(('QQJJA',0))) == 6 # Four of a kind
+assert(type_key_with_joker(('235JA',0))) == 2 # One pair
+assert(type_key_with_joker(('23JAA',0))) == 4 # Three of a kind
+assert(type_key_with_joker(('QJ4J8',0))) == 4 # Three of a kind
+assert(type_key_with_joker(('22JAA',0))) == 5 # Full house
+assert(type_key_with_joker(('QQQJJ',0))) == 7 # Five of a kind
+assert(type_key_with_joker(('JJJJJ',0))) == 7 # Five of a kind
+assert(type_key_with_joker(('23JJJ',0))) == 6 # Four of a kind
+assert(type_key_with_joker(('2222J',0))) == 7 # Five of a kind
+assert(type_key_with_joker(('2J22J',0))) == 7 # Five of a kind
