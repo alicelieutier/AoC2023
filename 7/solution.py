@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 import os
+import re
 
 TEST_FILE = f'{os.path.dirname(__file__)}/test_input'
 INPUT_FILE = f'{os.path.dirname(__file__)}/input'
@@ -22,7 +23,7 @@ def hand_value(cards):
   counter = {card: 0 for card in set(cards)}
   for card in cards:
     counter[card] += 1
-  match tuple(sorted(counter.values())):
+  match frequencies := tuple(sorted(counter.values())):
     case 1,1,1,1,1: return 1 # High card
     case 1,1,1,2: return 2 # One pair
     case 1,2,2: return 3 # Two pair
@@ -30,7 +31,7 @@ def hand_value(cards):
     case 2,3: return 5 # Full house
     case 1,4: return 6 # Four of a kind
     case (5,): return 7 # Five of a kind
-    case _: print(f"Help! couldn't score hand: {cards, counter, tuple(sorted(counter.values()))}")
+    case _: print(f"Help! couldn't score hand {cards}: {frequencies}")
 
 def type_key(hand):
   cards, _ = hand
@@ -38,30 +39,20 @@ def type_key(hand):
 
 def type_key_with_joker(hand):
   cards, _ = hand
-  if 'J' not in cards: return hand_value(cards)
-
-  other_cards = {card for card in cards if card != 'J'}
-  match len(other_cards):
-    case 4: return 2 # One pair
-    case 3: return 4 # Three of a kind
-    case 2: # could result in a full house or a four of a kind
-      if cards.count('J') == 1:
-        return 5 if hand_value(cards) == 3 else 6
-      return 6
-    case _:
-      return 7 # Five of a kind
+  most_common_non_joker_card = sorted(cards, key=lambda card: 0 if card == 'J' else cards.count(card))[-1]
+  return hand_value(re.sub('J', most_common_non_joker_card, cards))
 
 def part_1(file):
   hands = parse_file(file)
   hands.sort(key=lexico_key('23456789TJQKA'))
   hands.sort(key=type_key)
-  return sum((index+1) * bid for index, (_, bid) in enumerate(hands))
+  return sum((index + 1) * bid for index, (_, bid) in enumerate(hands))
 
 def part_2(file):
   hands = parse_file(file)
   hands.sort(key=lexico_key('J23456789TQKA'))
   hands.sort(key=type_key_with_joker)
-  return sum((index+1) * bid for index, (_, bid) in enumerate(hands))
+  return sum((index + 1) * bid for index, (_, bid) in enumerate(hands))
 
 # Solution
 print(part_1(INPUT_FILE)) # 251058093
