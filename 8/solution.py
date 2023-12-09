@@ -54,19 +54,16 @@ def length_to_end(nodes, instructions, starting_node, end_condition):
 def part_1(file):
   instructions, nodes = parse_file(file)
   return length_to_end(
-    nodes,
-    instructions,
-    'AAA',
-    lambda node: node == 'ZZZ'
-  )
+    nodes, instructions,
+    'AAA', lambda node: node == 'ZZZ')
 
 def part_2(file):
   instructions, nodes = parse_file(file)
   starting_nodes = [node for node in nodes.keys() if node[2] == 'A']
-  lengths = [
-    length_to_end(nodes, instructions, starting_node, lambda node: node[2] == 'Z')
-    for starting_node in starting_nodes
-  ]
+  lengths = [length_to_end(
+    nodes, instructions,
+    starting_node, lambda node: node[2] == 'Z')
+    for starting_node in starting_nodes]
   return reduce(lcm, lengths)
 
 # Solution
