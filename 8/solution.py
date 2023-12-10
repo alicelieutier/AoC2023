@@ -3,6 +3,7 @@ import os
 import re
 from itertools import cycle
 from functools import reduce
+from math import lcm
 
 TEST_FILE_1 = f'{os.path.dirname(__file__)}/test_input_1'
 TEST_FILE_2 = f'{os.path.dirname(__file__)}/test_input_2'
@@ -18,25 +19,6 @@ def parse_file(file):
     instructions = lines[0].strip()
     nodes = dict(parse_line(line.strip()) for line in lines[2:])
     return instructions, nodes
-  
-def memoize_2(fun):
-  memo = {}
-  def aux(a, b):
-    if (a,b) not in memo:
-      memo[(a,b)] = fun(a,b)
-    return memo[(a,b)]
-  return aux
-
-@memoize_2
-def gcd(a, b):
-  if a < b:
-    b, a = a, b
-  if b == 0: return a
-  r = a % b
-  return gcd(b, r)
-
-def lcm(a, b):
-  return int(a / gcd(a, b)) * b
 
 def length_to_end(nodes, instructions, starting_node, end_condition):
   directions = cycle(instructions)
@@ -59,12 +41,12 @@ def part_1(file):
 
 def part_2(file):
   instructions, nodes = parse_file(file)
-  starting_nodes = [node for node in nodes.keys() if node[2] == 'A']
+  starting_nodes = [node for node in nodes.keys() if node[-1] == 'A']
   lengths = [length_to_end(
     nodes, instructions,
-    starting_node, lambda node: node[2] == 'Z')
+    starting_node, lambda node: node[-1] == 'Z')
     for starting_node in starting_nodes]
-  return reduce(lcm, lengths)
+  return lcm(*lengths)
 
 # Solution
 print(part_1(INPUT_FILE)) # 24253
