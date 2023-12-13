@@ -36,6 +36,26 @@ def horizontal_reflection(pattern):
         return i+1
   return 0
 
+def hamming_distance(string1, string2):
+  return sum(c1 != c2 for c1, c2 in zip(string1, string2))
+
+def check_reflection_with_smudge(pattern, index):
+  smudge_found = False
+  for i, j in zip(range(index, -1, -1),range(index+1, len(pattern))):
+    if pattern[i] != pattern[j]:
+      if hamming_distance(pattern[i], pattern[j]) == 1 and not smudge_found:
+        smudge_found = True
+        continue
+      return False
+  return True if smudge_found else False
+
+def horizontal_reflection_with_smudge(pattern):
+  for i, (line1, line2) in enumerate(pairwise(pattern)):
+    if hamming_distance(line1, line2) < 2:
+      if check_reflection_with_smudge(pattern, i):
+        return i+1
+  return 0
+
 def summarize(pattern):
   h = horizontal_reflection(pattern)
   if h > 0: return 100*h
@@ -46,14 +66,30 @@ def summarize(pattern):
 
   raise Exception('No reflection found in pattern!')
 
+def summarize_with_smudge(pattern):
+  h = horizontal_reflection_with_smudge(pattern)
+  if h > 0: return 100*h
+
+  new_pattern = rotated(pattern)
+  v = horizontal_reflection_with_smudge(new_pattern)
+  if v > 0: return v
+
+  raise Exception('No reflection found in pattern!')
+
 def part_1(file):
   patterns = parse_file(file)
   return sum(summarize(pattern) for pattern in patterns)
 
+def part_2(file):
+  patterns = parse_file(file)
+  return sum(summarize_with_smudge(pattern) for pattern in patterns)
+
 # Solution
 print(part_1(INPUT_FILE))
+print(part_2(INPUT_FILE))
 
 # Tests
 assert(part_1(TEST_FILE)) == 405
+assert(part_2(TEST_FILE)) == 400
 
 assert horizontal_reflection(['#...##..#', '#....#..#', '..##..###', '#####.##.', '#####.##.', '..##..###', '#....#..#']) == 4
