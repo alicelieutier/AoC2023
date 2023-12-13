@@ -41,6 +41,9 @@ def better_range(a,b):
   if a < b: return range(a,b)
   return range(a,b,-1)
 
+def hamming_distance(string1, string2):
+    return sum(c1 != c2 for c1, c2 in zip(string1, string2))
+
 def distance(image, a, b, e=2):
   xa, ya = a
   xb, yb = b
