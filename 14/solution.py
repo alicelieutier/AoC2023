@@ -78,56 +78,54 @@ def tilt_east(platform):
         last_open_pos -= 1
   return tuple(''.join(line) for line in platform)
 
+@cache
+def cycle(platform):
+  platform = tilt_north(platform)
+  platform = tilt_west(platform)
+  platform = tilt_south(platform)
+  platform = tilt_east(platform)
+  return platform
+
+def load(platform):
+  height = len(platform)
+  return sum(row.count('O')*weight for row, weight in zip(platform, count(height,-1)))
+
+
 def part_1(file):
   platform = parse_file(file)
   tilted_platform = tilt_north(platform)
-  height = len(platform)
-  return sum(row.count('O')*weight for row, weight in zip(tilted_platform, count(height,-1)))
+  return load(tilted_platform)
 
 def part_2(file, cycles=1000000000):
   platform = parse_file(file)
-  height = len(platform)
-  viz(platform)
-  counter = 0
+
   offset = 0
   cycle_length = 0
   last_seen = {platform: 0}
-  for i in range(cycles):
-    platform = tilt_north(platform)
-    platform = tilt_west(platform)
-    platform = tilt_south(platform)
-    platform = tilt_east(platform)
-    if platform in last_seen and counter == 0:
-      offset = last_seen[platform]
-      cycle_length = i - offset
+
+  for i in count(1):
+    platform = cycle(platform)
 
     if platform in last_seen:
-      counter += 1
-      print(i, offset, cycle_length, counter, sum(row.count('O')*weight for row, weight in zip(platform, count(height,-1))))
-      
-    
-    if counter > 0 and counter == (1000000000 - offset) % cycle_length:
+      offset = last_seen[platform]
+      cycle_length = i - last_seen[platform]
       break
 
     last_seen[platform] = i
 
-  return sum(row.count('O')*weight for row, weight in zip(platform, count(height,-1)))
+  final_platform_number = offset + (1000000000 - offset) % cycle_length
+  final_platform = [key for key, value in last_seen.items() if value == final_platform_number][0]
 
+  return load(final_platform)
 
 # Solution
-# print(part_1(INPUT_FILE)) # 109098
-print(part_2(INPUT_FILE)) # 100079 is too high!
+print(part_1(INPUT_FILE)) # 109098
+print(part_2(INPUT_FILE)) # 100064
 
 # Tests
-assert tilt_north((
- '##..',
- 'O.O.',
- '..#O',
- 'OOO.')) == (
- '##OO',
- 'OO..',
- 'O.#.',
- '..O.')
+assert tilt_north(('##..','O.O.','..#O','OOO.')) == ('##OO','OO..','O.#.','..O.')
 
-# assert(part_1(TEST_FILE)) == 136
+assert(part_1(TEST_FILE)) == 136
 assert(part_2(TEST_FILE)) == 64
+assert(part_1(INPUT_FILE)) == 109098
+assert(part_2(INPUT_FILE)) == 100064
