@@ -90,7 +90,6 @@ def load(platform):
   height = len(platform)
   return sum(row.count('O')*weight for row, weight in zip(platform, count(height,-1)))
 
-
 def part_1(file):
   platform = parse_file(file)
   tilted_platform = tilt_north(platform)
@@ -113,7 +112,7 @@ def part_2(file, cycles=1000000000):
 
     last_seen[platform] = i
 
-  final_platform_number = offset + (1000000000 - offset) % cycle_length
+  final_platform_number = offset + (cycles - offset) % cycle_length
   final_platform = [key for key, value in last_seen.items() if value == final_platform_number][0]
 
   return load(final_platform)
