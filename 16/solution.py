@@ -72,9 +72,10 @@ def next_pos_with_device(device, pos, direction: Dir) -> list:
     case _:
       return [next_pos(pos, direction)]
 
-def light_ray(devices, dimensions):
+def light_ray(devices, dimensions, start):
   light = set()
-  todo = {((0,0), Dir.RIGHT)}
+  energised_cells = set()
+  todo = {start}
 
   while len(todo) > 0:
     pos, direction = todo.pop()
@@ -84,19 +85,33 @@ def light_ray(devices, dimensions):
       continue
 
     light.add((pos, direction))
+    energised_cells.add(pos)
 
     todo |= set(next_pos_with_device(devices.get(pos), pos, direction))
 
-  return light
+  return energised_cells
+
+def possible_starts(dimensions):
+  height, width = dimensions
+  for i in range(height):
+    yield ((i, 0), Dir.RIGHT)
+    yield ((i, width-1), Dir.LEFT)
+  for j in range(height):
+    yield ((0, j), Dir.DOWN)
+    yield ((height-1, j), Dir.UP)
 
 def part_1(file):
   devices, dimensions = parse_file(file)
-  light = light_ray(devices, dimensions)
-  energised_cells = {pos for pos, _ in light}
-  return len(energised_cells)
+  return len(light_ray(devices, dimensions, ((0,0), Dir.RIGHT)))
+
+def part_2(file):
+  devices, dimensions = parse_file(file)
+  return max(len(light_ray(devices, dimensions, start)) for start in possible_starts(dimensions))
 
 # Solution
 print(part_1(INPUT_FILE)) # 7728
+print(part_2(INPUT_FILE)) # 8061
 
 # Tests
 assert(part_1(TEST_FILE)) == 46
+assert(part_2(TEST_FILE)) == 51
