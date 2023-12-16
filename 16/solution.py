@@ -34,7 +34,7 @@ def viz(dimensions, hashes):
         line.append('.')
     print(''.join(line))
 
-def within_limits(pos, dimensions):
+def within_limits(dimensions, pos):
   height, width = dimensions
   i, j = pos
   return i >= 0 and i < height and j >= 0 and j < width
@@ -73,21 +73,18 @@ def next_pos_with_device(device, pos, direction: Dir) -> list:
       return [next_pos(pos, direction)]
 
 def light_ray(devices, dimensions, start):
-  light = set()
+  seen = set()
   energised_cells = set()
   todo = {start}
 
   while len(todo) > 0:
     pos, direction = todo.pop()
-    if not within_limits(pos, dimensions):
-      continue
-    if (pos, direction) in light:
-      continue
 
-    light.add((pos, direction))
-    energised_cells.add(pos)
-
-    todo |= set(next_pos_with_device(devices.get(pos), pos, direction))
+    if within_limits(dimensions, pos) and (pos, direction) not in seen:
+      seen.add((pos, direction))
+      energised_cells.add(pos)
+      
+      todo |= set(next_pos_with_device(devices.get(pos), pos, direction))
 
   return energised_cells
 
