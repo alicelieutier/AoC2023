@@ -1,92 +1,77 @@
 #! /Library/Frameworks/Python.framework/Versions/3.12/bin/python3
 import os
-from functools import reduce
-from itertools import count
-from math import inf
+from itertools import pairwise
 
 TEST_FILE = f'{os.path.dirname(__file__)}/test_input'
 INPUT_FILE = f'{os.path.dirname(__file__)}/input'
 
-def better_range(a,b):
-  if a < b: return range(a,b)
-  return range(a,b,-1)
+def parse_line_part_1(line):
+  direction, number, _ = line.split(' ')
+  return direction, int(number)
 
-def get_boundaries(points, margin=0):
-  def aux(acc, point):
-    x,y = point
-    min_x, max_x, min_y, max_y = acc
-    return min(min_x,x), max(max_x,x), min(min_y,y), max(max_y,y)
-  min_x, max_x, min_y, max_y = reduce(aux, points, (inf,-inf,inf,-inf))
-  return min_x-margin, max_x+margin, min_y-margin, max_y+margin
-
-def viz(hashes, ohs=set()):
-  min_x, max_x, min_y, max_y = get_boundaries(hashes, 0)
-  new_sketch = []
-  for i, new_i in zip(range(min_x, max_x+1), count()):
-    new_sketch.append([])
-    for j in range(min_y, max_y+1):
-      if (i, j) in hashes:
-        new_sketch[new_i].append('#')
-      elif (i, j) in ohs:
-        new_sketch[new_i].append('O')
-      else:
-        new_sketch[new_i].append('.')
-  print('\n'.join([''.join(line) for line in new_sketch]))
-
-def parse_line(line):
-  direction, number, color = line.split(' ')
-  return direction, int(number), color.strip('()')
-
-def parse_file(file):  
+def parse_file_part_1(file):  
   with open(file) as input:
-    return [parse_line(line.strip()) for line in input.readlines()]
+    return [parse_line_part_1(line.strip()) for line in input.readlines()]
+  
+def parse_line_part_2(line):
+  color = line.split(' ')[-1]
+  direction = 'RDLU'[int(color[-2])]
+  number = int(color[2:-2], 16)
+  return direction, number
 
-def adjacents(pos):
-  i, j = pos
-  return {
-    (i-1, j-1), (i-1, j), (i-1, j+1),
-    (i  , j-1),           (i  , j+1),
-    (i+1, j-1), (i+1, j), (i+1, j+1),
-  }
+def parse_file_part_2(file):  
+  with open(file) as input:
+    return [parse_line_part_2(line.strip()) for line in input.readlines()]
 
-def fill_space(walls, start=(1,1)):
-  tiles = set()
-  to_visit = {start}
-  while to_visit:
-    pos = to_visit.pop()
-    tiles.add(pos)
-    to_visit |= (adjacents(pos) - (walls | tiles))
-  return tiles
-
-def edges(dig_plan):
-  edges = set()
-  pos = (0,0)
-  for direction, number, _ in dig_plan:
-    for _ in range(number):
-      match direction:
-        case 'R':
-          pos = pos[0],pos[1]+1
-          edges.add(pos)
-        case 'L':
-          pos = pos[0],pos[1]-1
-          edges.add(pos)
-        case 'U':
-          pos = pos[0]-1,pos[1]
-          edges.add(pos)
-        case 'D':
-          pos = pos[0]+1,pos[1]
-          edges.add(pos)
-  return edges
+# Finding the x,y coordinates of the polygon envelope
+# and using the shoelace algortihm
+def count_space(dig_plan):
+  space = 0
+  i,j = 0,0
+  x,y = 0,0
+  polarity = -1
+  for (direction, number),(next_dir,_) in pairwise(dig_plan):
+    match direction, next_dir:
+      case 'R', 'D':
+        i,j = i, j+number
+        x,y = i, j+1
+      case 'R', 'U':
+        i,j = i, j+number
+        x,y = i, j
+      case 'L', 'D':
+        i,j = i, j-number
+        x,y = i+1, j+1
+      case 'L', 'U':
+        i,j = i, j-number
+        x,y = i+1, j
+      case 'D', 'R':
+        i,j = i+number, j
+        x,y = i, j+1
+      case 'D', 'L':
+        i,j = i+number, j
+        x,y = i+1, j+1
+      case 'U', 'R':
+        i,j = i-number, j
+        x,y = i, j
+      case 'U', 'L':
+        i,j = i-number, j
+        x,y = i+1, j
+    space += polarity*x*y
+    polarity = -polarity
+  return space
 
 def part_1(file):
-  dig_plan = parse_file(file)
-  edges_points = edges(dig_plan)
-  tiles = fill_space(edges_points)
-  # viz(edges_points, tiles)
-  return len(edges_points | tiles)
+  dig_plan = parse_file_part_1(file)
+  return count_space(dig_plan)
+
+def part_2(file):
+  dig_plan = parse_file_part_2(file)
+  return count_space(dig_plan)
 
 # Solution
-print(part_1(INPUT_FILE))
+print(part_1(INPUT_FILE)) # 36807
+print(part_2(INPUT_FILE)) # 48797603984357
 
 # Tests
-assert(part_1(TEST_FILE)) == 62
+assert part_1(TEST_FILE) == 62
+assert part_2(TEST_FILE) == 952408144115
