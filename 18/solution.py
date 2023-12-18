@@ -24,49 +24,51 @@ def parse_file_part_2(file):
     return [parse_line_part_2(line.strip()) for line in input.readlines()]
 
 # Finding the x,y coordinates of the polygon envelope
-# and using the shoelace algortihm
-def count_space(dig_plan):
-  space = 0
+def vertices(dig_plan):
   i,j = 0,0
-  x,y = 0,0
-  polarity = -1
+  yield 0,0
   for (direction, number),(next_dir,_) in pairwise(dig_plan):
     match direction, next_dir:
       case 'R', 'D':
         i,j = i, j+number
-        x,y = i, j+1
+        yield i, j+1
       case 'R', 'U':
         i,j = i, j+number
-        x,y = i, j
+        yield i, j
       case 'L', 'D':
         i,j = i, j-number
-        x,y = i+1, j+1
+        yield i+1, j+1
       case 'L', 'U':
         i,j = i, j-number
-        x,y = i+1, j
+        yield i+1, j
       case 'D', 'R':
         i,j = i+number, j
-        x,y = i, j+1
+        yield i, j+1
       case 'D', 'L':
         i,j = i+number, j
-        x,y = i+1, j+1
+        yield i+1, j+1
       case 'U', 'R':
         i,j = i-number, j
-        x,y = i, j
+        yield i, j
       case 'U', 'L':
         i,j = i-number, j
-        x,y = i+1, j
-    space += polarity*x*y
-    polarity = -polarity
-  return space
+        yield i+1, j
+
+def alternate():
+  while True:
+    yield 1
+    yield -1
+
+def total_space(vertices):
+  return sum(polarity*x*y for polarity, (x,y) in zip(alternate(), vertices))
 
 def part_1(file):
   dig_plan = parse_file_part_1(file)
-  return count_space(dig_plan)
+  return total_space(vertices(dig_plan))
 
 def part_2(file):
   dig_plan = parse_file_part_2(file)
-  return count_space(dig_plan)
+  return total_space(vertices(dig_plan))
 
 # Solution
 print(part_1(INPUT_FILE)) # 36807
