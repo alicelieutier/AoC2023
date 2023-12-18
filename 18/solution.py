@@ -22,53 +22,34 @@ def parse_line_part_2(line):
 def parse_file_part_2(file):  
   with open(file) as input:
     return [parse_line_part_2(line.strip()) for line in input.readlines()]
+  
+def area(dig_plan):
+  space = 0
+  i = 0
+  for direction, number in dig_plan:
+    match direction:
+      case 'R': space -= i*number
+      case 'L': space += i*number
+      case 'U': i -= number
+      case 'D': i += number
+  return space
 
-# Finding the x,y coordinates of the polygon envelope
-def vertices(dig_plan):
-  i,j = 0,0
-  yield 0,0
-  for (direction, number),(next_dir,_) in pairwise(dig_plan):
-    match direction, next_dir:
-      case 'R', 'D':
-        i,j = i, j+number
-        yield i, j+1
-      case 'R', 'U':
-        i,j = i, j+number
-        yield i, j
-      case 'L', 'D':
-        i,j = i, j-number
-        yield i+1, j+1
-      case 'L', 'U':
-        i,j = i, j-number
-        yield i+1, j
-      case 'D', 'R':
-        i,j = i+number, j
-        yield i, j+1
-      case 'D', 'L':
-        i,j = i+number, j
-        yield i+1, j+1
-      case 'U', 'R':
-        i,j = i-number, j
-        yield i, j
-      case 'U', 'L':
-        i,j = i-number, j
-        yield i+1, j
+def perimeter(dig_plan):
+  return sum(distance for _, distance in dig_plan)
 
-def alternate():
-  while True:
-    yield 1
-    yield -1
-
-def total_space(vertices):
-  return sum(polarity*x*y for polarity, (x,y) in zip(alternate(), vertices))
+def total_area(dig_plan):
+  a = area(dig_plan)
+  p = perimeter(dig_plan)
+  # pick theorem formula
+  return int(a + (p/2) + 1)
 
 def part_1(file):
   dig_plan = parse_file_part_1(file)
-  return total_space(vertices(dig_plan))
+  return total_area(dig_plan)
 
 def part_2(file):
   dig_plan = parse_file_part_2(file)
-  return total_space(vertices(dig_plan))
+  return total_area(dig_plan)
 
 # Solution
 print(part_1(INPUT_FILE)) # 36807
