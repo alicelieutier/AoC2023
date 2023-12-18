@@ -23,6 +23,8 @@ def parse_file_part_2(file):
   with open(file) as input:
     return [parse_line_part_2(line.strip()) for line in input.readlines()]
   
+# add space above left edges
+# subtract space above right edges
 def area(dig_plan):
   space = 0
   i = 0
@@ -40,7 +42,7 @@ def perimeter(dig_plan):
 def total_area(dig_plan):
   a = area(dig_plan)
   p = perimeter(dig_plan)
-  # pick theorem formula
+  # using pick theorem
   return int(a + (p/2) + 1)
 
 def part_1(file):
